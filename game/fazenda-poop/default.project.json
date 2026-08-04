@@ -1,0 +1,35 @@
+{
+  "name": "FazendaPoop",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$path": "src/ReplicatedStorage"
+    },
+    "ServerScriptService": {
+      "$path": "src/ServerScriptService"
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "$path": "src/StarterPlayer/StarterPlayerScripts"
+      }
+    },
+    "StarterPack": {
+      "$path": "src/StarterPack"
+    },
+    "Workspace": {
+      "$properties": {
+        "Gravity": 196.2
+      },
+      "Fazenda": {
+        "$className": "Folder"
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Ambient": [0.15, 0.15, 0.15],
+        "Brightness": 2,
+        "OutdoorAmbient": [0.5, 0.5, 0.5]
+      }
+    }
+  }
+}

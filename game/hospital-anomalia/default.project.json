@@ -1,0 +1,34 @@
+{
+  "name": "HospitalAnomalia",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$path": "src/ReplicatedStorage"
+    },
+    "ServerScriptService": {
+      "$path": "src/ServerScriptService"
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "$path": "src/StarterPlayer/StarterPlayerScripts"
+      }
+    },
+    "Workspace": {
+      "$properties": {
+        "Gravity": 196.2
+      },
+      "Lobby": {
+        "$className": "Folder"
+      },
+      "Hospital": {
+        "$className": "Folder"
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Ambient": [0.1, 0.1, 0.1],
+        "Brightness": 1
+      }
+    }
+  }
+}

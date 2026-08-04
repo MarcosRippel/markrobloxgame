@@ -1,0 +1,24 @@
+# Secrets
+.env
+.env.*
+*.pem
+*.cookie
+
+# Roblox / tooling
+*.rbxl.lock
+.DS_Store
+Thumbs.db
+
+# NEVER commit creation brain (if someone copies by mistake)
+_LAB/
+.grok/
+markgamesbuildbrain/
+**/SKILL.md
+physics-brain/
+fontes-externas/
+
+# Node / Python noise
+node_modules/
+.venv/
+__pycache__/
+.overclock-app/
