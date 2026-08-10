@@ -22,3 +22,7 @@ node_modules/
 .venv/
 __pycache__/
 .overclock-app/
+
+# graphify-out e derivado: o hook post-commit o reconstroi apos cada commit,
+# entao versiona-lo deixa o repo permanentemente sujo. Fica so no disco.
+graphify-out/
