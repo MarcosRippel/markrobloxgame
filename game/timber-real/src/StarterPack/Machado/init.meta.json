@@ -1,0 +1,9 @@
+{
+  "className": "Tool",
+  "properties": {
+    "Name": "Machado",
+    "RequiresHandle": false,
+    "CanBeDropped": false,
+    "ToolTip": "Clique num tronco para golpear"
+  }
+}
