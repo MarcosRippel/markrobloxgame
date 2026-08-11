@@ -1,5 +1,6 @@
-# timber-real
+# Desmatamento
 
+**Nome comercial: Desmatamento** (a pasta/slug interno segue `timber-real`).
 Protótipo Roblox (Rojo + Luau) de um jogo de derrubada de árvore onde **a
 árvore é um sólido de verdade que se desfaz exatamente onde você corta**.
 

@@ -72,7 +72,7 @@ local fps = linha(13, CINZA)
 local erro = linha(12, Color3.fromRGB(240, 150, 140))
 local ajuda = linha(12, CINZA)
 
-titulo.Text = "TIMBER-REAL · SPIKE M0"
+titulo.Text = "DESMATAMENTO · SPIKE M0"
 veredito.Text = "conectando…"
 ajuda.Text = "Clique num tronco (ou tecle F) para dar um golpe."
 
@@ -97,7 +97,7 @@ Net.DiagnosticoAtualizado.OnClientEvent:Connect(function(s)
 		return
 	end
 
-	titulo.Text = "TIMBER-REAL · SPIKE M0 · " .. tostring(s.ambiente)
+	titulo.Text = "DESMATAMENTO · SPIKE M0 · " .. tostring(s.ambiente)
 	veredito.Text = tostring(s.veredito)
 	pintarVeredito(veredito.Text)
 
