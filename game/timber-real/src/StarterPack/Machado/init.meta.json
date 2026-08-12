@@ -2,7 +2,7 @@
   "className": "Tool",
   "properties": {
     "Name": "Machado",
-    "RequiresHandle": false,
+    "RequiresHandle": true,
     "CanBeDropped": false,
     "ToolTip": "Clique num tronco para golpear"
   }

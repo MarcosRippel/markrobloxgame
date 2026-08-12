@@ -76,6 +76,33 @@ Config.Ferramentas = {
 Config.FerramentaPadraoM0 = "Machado"
 
 -- ─────────────────────────────────────────────────────────────
+-- Feedback R1 (juice) — client-side, imediato no ponto do golpe.
+-- Diretriz de VFX (ver README): empilhar número + partícula + som + shake LEVE.
+-- Anti-padrões proibidos: shake constante, som a cada frame, Rate sem cap.
+-- ─────────────────────────────────────────────────────────────
+Config.Feedback = {
+	-- serragem (ParticleEmitter, só burst via :Emit — Rate fica 0)
+	SERRAGEM_PARTICULAS = 16,
+	SERRAGEM_VIDA_MIN = 0.4,
+	SERRAGEM_VIDA_MAX = 0.7,
+	SERRAGEM_VELOCIDADE = 9,
+
+	-- número pop ("+madeira" → volume real quando o servidor responde)
+	POP_SUBIDA_STUDS = 3,
+	POP_DURACAO_S = 0.6,
+	POP_MAX_SIMULTANEOS = 24, -- clicker gera spam: teto pra não vazar GUI
+
+	-- camera shake LEVE (graus) — cooldown pra não empilhar e enjoar
+	SHAKE_DURACAO_S = 0.12,
+	SHAKE_AMPLITUDE_GRAUS = 0.35,
+	SHAKE_COOLDOWN_S = 0.15,
+
+	-- som de impacto — cooldown mínimo (serra/motosserra é contínua)
+	SOM_COOLDOWN_S = 0.08,
+	SOM_VOLUME = 0.5,
+}
+
+-- ─────────────────────────────────────────────────────────────
 -- Cenário do spike
 -- ─────────────────────────────────────────────────────────────
 Config.M0 = {

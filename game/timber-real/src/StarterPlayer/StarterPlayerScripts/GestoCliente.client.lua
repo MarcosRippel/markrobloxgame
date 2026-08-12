@@ -14,6 +14,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.ConfiguracaoTimber)
 local Net = require(ReplicatedStorage.Net)
+local GolpeLocal = require(script.Parent.GolpeLocal)
 
 local jogador = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -88,6 +89,14 @@ local function golpear()
 	end
 
 	cortando = true
+
+	-- juice IMEDIATO no ponto que já temos — não espera o servidor (SPEC risco #4).
+	GolpeLocal.emitir({
+		ponto = resultado.Position,
+		normal = resultado.Normal,
+		ferramenta = FERRAMENTA,
+	})
+
 	Net.GolpeAplicado:FireServer(resultado.Instance, montarArco(resultado), FERRAMENTA)
 
 	task.delay(DURACAO_GOLPE, function()
