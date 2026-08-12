@@ -35,16 +35,25 @@ local popAtual: { label: TextLabel?, expira: number }? = nil
 -- Preload dos SFX (se algum falhar, engole e segue — jogo nunca quebra)
 -- ─────────────────────────────────────────────────────────────
 task.spawn(function()
+	-- PreloadAsync exige um array de Instances, NÃO de strings rbxassetid://
+	-- (senão o engine lança "Unable to cast value to Object" e o pcall come tudo,
+	-- deixando o 1º golpe mudo). Criamos Sounds temporários só pro preload.
 	local alvos = {}
 	for _, chave in ipairs({ "SFX_HIT_MADEIRA_1", "SFX_HIT_MADEIRA_2", "SFX_LASCA_MADEIRA" }) do
 		local rbx = Assets.Rbx(chave)
 		if rbx then
-			table.insert(alvos, rbx)
+			local som = Instance.new("Sound")
+			som.SoundId = rbx
+			table.insert(alvos, som)
 		end
 	end
 	pcall(function()
 		ContentProvider:PreloadAsync(alvos)
 	end)
+	-- as instances só serviam pro preload; o cache do asset fica no engine
+	for _, som in ipairs(alvos) do
+		som:Destroy()
+	end
 end)
 
 -- ─────────────────────────────────────────────────────────────
@@ -180,14 +189,16 @@ end)
 -- ─────────────────────────────────────────────────────────────
 -- Som — no ponto, com cooldown mínimo. Falha de load = silêncio, nunca crash.
 -- ─────────────────────────────────────────────────────────────
-local somProximo = 0
+-- cooldown SEPARADO por canal: a lasca (chega no CorteResolvido, <80ms após o
+-- hit local) não pode ser engolida pelo cooldown do hit. Cada canal tem o seu.
+local somProximo: { [string]: number } = {}
 
-local function tocar(ponto: Vector3, chave: string, volume: number?)
+local function tocar(ponto: Vector3, chave: string, canal: string, volume: number?)
 	local agora = os.clock()
-	if agora < somProximo then
+	if agora < (somProximo[canal] or 0) then
 		return
 	end
-	somProximo = agora + cfg.SOM_COOLDOWN_S
+	somProximo[canal] = agora + cfg.SOM_COOLDOWN_S
 
 	local rbx = Assets.Rbx(chave)
 	if not rbx then
@@ -221,7 +232,7 @@ GolpeLocal.conectar(function(golpe)
 	tremer()
 
 	alternarSom = 1 - alternarSom
-	tocar(ponto, if alternarSom == 0 then "SFX_HIT_MADEIRA_1" else "SFX_HIT_MADEIRA_2")
+	tocar(ponto, if alternarSom == 0 then "SFX_HIT_MADEIRA_1" else "SFX_HIT_MADEIRA_2", "hit")
 
 	popAtual = {
 		label = novaPop(ponto, "+madeira"),
@@ -239,6 +250,8 @@ Net.CorteResolvido.OnClientEvent:Connect(function(r)
 
 	if r.ok then
 		local texto = string.format("+%.1f", r.volume or 0)
+		-- NOTA(M0): race cosmetica conhecida — com 2 golpes em voo o volume pode
+		-- cair no pop errado. Fix futuro: seq no payload. Deferido (juice, sem crash).
 		local atual = popAtual
 		if atual and atual.label and atual.label.Parent and os.clock() < atual.expira then
 			atual.label.Text = texto -- vira o volume real, no lugar
@@ -249,7 +262,7 @@ Net.CorteResolvido.OnClientEvent:Connect(function(r)
 		-- servidor confirmou cacos: um segundo respingo de serragem + estalo
 		if (r.cacos or 0) > 0 and ultimoPonto then
 			serragem(ultimoPonto, Vector3.yAxis, math.min(10, (r.cacos or 0) * 2))
-			tocar(ultimoPonto, "SFX_LASCA_MADEIRA")
+			tocar(ultimoPonto, "SFX_LASCA_MADEIRA", "lasca")
 		end
 	elseif r.erro then
 		-- golpe recusado: apaga o número otimista e dá só um "tick" sutil
@@ -257,7 +270,8 @@ Net.CorteResolvido.OnClientEvent:Connect(function(r)
 		if atual and atual.label and atual.label.Parent then
 			atual.label.Text = ""
 		end
-		tocar(ultimoPonto or camera.CFrame.Position, "SFX_HIT_MADEIRA_2", 0.18)
+		-- canal próprio: o tick não pode ser engolido pelo cooldown do hit local.
+		tocar(ultimoPonto or camera.CFrame.Position, "SFX_HIT_MADEIRA_2", "tick", 0.18)
 	end
 end)
 

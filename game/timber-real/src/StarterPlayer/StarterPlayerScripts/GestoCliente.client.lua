@@ -107,6 +107,12 @@ end
 -- clique com a ferramenta equipada
 local function ligarFerramenta(ferramentaInstancia)
 	if ferramentaInstancia:IsA("Tool") then
+		-- o Tool transita Backpack↔Character (ChildAdded redispara): sem esta
+		-- guarda, cada re-equip empilharia mais um Connect em Activated (leak).
+		if ferramentaInstancia:GetAttribute("GolpeLigado") then
+			return
+		end
+		ferramentaInstancia:SetAttribute("GolpeLigado", true)
 		ferramentaInstancia.Activated:Connect(golpear)
 	end
 end

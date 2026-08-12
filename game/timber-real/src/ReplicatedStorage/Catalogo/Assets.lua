@@ -19,7 +19,10 @@ export type AssetEntry = {
 	hasScripts: boolean,
 }
 
-local Assets: { [string]: AssetEntry } = {
+-- As entradas ficam num sub-campo tipado; assim o módulo pode carregar também a
+-- função Assets.Rbx sem que o Script Analysis acuse "função não é AssetEntry"
+-- (o mapa é estritamente { [string]: AssetEntry }).
+local SFX: { [string]: AssetEntry } = {
 	-- impacto do machado no tronco (dois pra alternar e não repetir zoado)
 	SFX_HIT_MADEIRA_1 = {
 		id = 131261474470044,
@@ -45,9 +48,13 @@ local Assets: { [string]: AssetEntry } = {
 	},
 }
 
+local Assets = {
+	SFX = SFX,
+}
+
 --[[ Devolve o rbxassetid:// de uma chave do catálogo, ou nil se não existir. ]]
 function Assets.Rbx(idLab: string): string?
-	local e = Assets[idLab]
+	local e = SFX[idLab]
 	return if e then e.rbx else nil
 end
 
