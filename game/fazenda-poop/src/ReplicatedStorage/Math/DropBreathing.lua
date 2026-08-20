@@ -6,10 +6,10 @@
 	(Comum / Premium / Raro) for grass regrowth.
 
 	Regenerate:
-	  python _LAB/tools/export_drop_breathing.py
+	  exportador offline do mapa logístico (Python), fora deste repo
 
 	r=3.72  u0=0.314159  frames=256
-	Design: _LAB/dicionarios/caos-para-gameplay.md
+	Design: caos determinístico aplicado a peso de drop.
 ]]
 
 export type FramePesos = {

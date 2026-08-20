@@ -1,2 +1,2 @@
 ﻿# HospitalAnomalia
-Prototipo Roblox (Rojo). Codigo tambem versionado no lab brain e pode ir para markrobloxgame/games/.
+Protótipo Roblox (Rojo + Luau): job-sim com twist de anomalia. Arquivado.
