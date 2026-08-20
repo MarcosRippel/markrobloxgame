@@ -1,0 +1,9 @@
+{
+  "className": "Tool",
+  "properties": {
+    "Name": "Facao",
+    "RequiresHandle": true,
+    "CanBeDropped": false,
+    "ToolTip": "Facão — golpe rápido em arco lateral"
+  }
+}

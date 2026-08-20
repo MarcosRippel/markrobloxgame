@@ -9,10 +9,30 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local Net = require(ReplicatedStorage.Net)
+local Config = require(ReplicatedStorage.ConfiguracaoTimber)
 
 local jogador = Players.LocalPlayer
+
+-- abrevia número: 1.2k / 3.4M (sem Util/Numeros no projeto). Igual ao FeedbackCliente.
+local function abreviar(n: number): string
+	n = n or 0
+	if n >= 1e6 then
+		return string.format("%.1fM", n / 1e6)
+	elseif n >= 1e3 then
+		return string.format("%.1fk", n / 1e3)
+	elseif n >= 100 then
+		return string.format("%d", math.floor(n + 0.5))
+	end
+	return string.format("%.1f", n)
+end
+
+-- $ com prefixo (o número do jogo vem do servidor; aqui só formata pra exibir).
+local function formatarDinheiro(n: number): string
+	return "$" .. abreviar(n)
+end
 
 local tela = Instance.new("ScreenGui")
 tela.Name = "TimberM0"
@@ -146,3 +166,117 @@ Net.CorteResolvido.OnClientEvent:Connect(function(r)
 		ajuda.Text = "golpe recusado: " .. tostring(r.erro)
 	end
 end)
+
+-- ─────────────────────────────────────────────────────────────
+-- Painel de DINHEIRO ($) — canto superior direito, em DESTAQUE (SPEC § 4). O $ é
+-- SERVER-AUTHORITATIVE: chega pronto no Net.EconomiaAtualizada (totalDinheiro) e o
+-- HUD só exibe — o cliente nunca calcula valor. Tickzinho de escala quando sobe.
+-- A MADEIRA (volume) vira sub-info client-side (proxy do quanto se cortou), sem $.
+-- ─────────────────────────────────────────────────────────────
+local painel = Instance.new("Frame")
+painel.Name = "Dinheiro"
+painel.AnchorPoint = Vector2.new(1, 0)
+painel.Size = UDim2.new(0, 220, 0, 76)
+painel.Position = UDim2.new(1, -16, 0, 16)
+painel.BackgroundColor3 = Color3.fromRGB(26, 24, 16)
+painel.BackgroundTransparency = 0.12
+painel.BorderSizePixel = 0
+painel.Parent = tela
+
+local painelCanto = Instance.new("UICorner")
+painelCanto.CornerRadius = UDim.new(0, 10)
+painelCanto.Parent = painel
+
+-- UIScale animado pra dar o "tick" quando o $ aumenta
+local escala = Instance.new("UIScale")
+escala.Scale = 1
+escala.Parent = painel
+
+local traco = Instance.new("UIStroke")
+traco.Color = Color3.fromRGB(232, 196, 96) -- dourado: é DINHEIRO
+traco.Transparency = 0.35
+traco.Thickness = 1.5
+traco.Parent = painel
+
+local rotulo = Instance.new("TextLabel")
+rotulo.Size = UDim2.new(1, -16, 0, 16)
+rotulo.Position = UDim2.new(0, 12, 0, 8)
+rotulo.BackgroundTransparency = 1
+rotulo.TextXAlignment = Enum.TextXAlignment.Left
+rotulo.Font = Enum.Font.GothamMedium
+rotulo.TextSize = 12
+rotulo.TextColor3 = Color3.fromRGB(236, 206, 120)
+rotulo.Text = "💰 DINHEIRO"
+rotulo.Parent = painel
+
+local valor = Instance.new("TextLabel")
+valor.Size = UDim2.new(1, -16, 0, 28)
+valor.Position = UDim2.new(0, 12, 0, 24)
+valor.BackgroundTransparency = 1
+valor.TextXAlignment = Enum.TextXAlignment.Left
+valor.Font = Enum.Font.GothamBold
+valor.TextSize = 26
+valor.TextColor3 = Color3.fromRGB(255, 236, 170)
+valor.Text = "$0"
+valor.Parent = painel
+
+-- sub-info: madeira acumulada (volume), client-side. É contexto, não o número-herói.
+local subMadeira = Instance.new("TextLabel")
+subMadeira.Size = UDim2.new(1, -16, 0, 14)
+subMadeira.Position = UDim2.new(0, 12, 0, 54)
+subMadeira.BackgroundTransparency = 1
+subMadeira.TextXAlignment = Enum.TextXAlignment.Left
+subMadeira.Font = Enum.Font.Gotham
+subMadeira.TextSize = 12
+subMadeira.TextColor3 = Color3.fromRGB(150, 200, 120)
+subMadeira.Text = "🪵 0 madeira"
+subMadeira.Parent = painel
+
+local pico = Config.Feedback.HUD_TICK_ESCALA
+local dur = Config.Feedback.HUD_TICK_DURACAO_S
+
+local infoTick = TweenInfo.new(dur, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local function tick()
+	escala.Scale = pico
+	TweenService:Create(escala, infoTick, { Scale = 1 }):Play()
+end
+
+-- DINHEIRO — server-authoritative: o servidor manda o totalDinheiro, o HUD só pinta.
+Net.EconomiaAtualizada.OnClientEvent:Connect(function(dados)
+	if typeof(dados) ~= "table" then
+		return
+	end
+	local total = dados.totalDinheiro
+	if typeof(total) ~= "number" then
+		return
+	end
+	valor.Text = formatarDinheiro(total)
+	tick() -- pulso do painel a cada $ que entra (golpe ou tora)
+end)
+
+-- MADEIRA (sub-info) — client-side, acumula os `volume` de cada CorteResolvido + o
+-- bônus de TORA no tombamento. É só contexto visual; o $ oficial vem do servidor.
+local totalMadeira = 0
+local function somarMadeira(quanto: number)
+	if typeof(quanto) ~= "number" or quanto <= 0 then
+		return
+	end
+	totalMadeira += quanto
+	subMadeira.Text = "🪵 " .. abreviar(totalMadeira) .. " madeira"
+end
+
+Net.CorteResolvido.OnClientEvent:Connect(function(r)
+	if typeof(r) == "table" and r.ok then
+		somarMadeira(r.volume or 0)
+	end
+end)
+
+if Net.TroncoTombou then
+	Net.TroncoTombou.OnClientEvent:Connect(function(dados)
+		-- TroncoTombou é FireAllClients: só o AUTOR credita o bônus de TORA, senão
+		-- todo mundo somaria +250 quando qualquer um derruba uma árvore.
+		if typeof(dados) == "table" and dados.autor == jogador then
+			somarMadeira(Config.Feedback.TORA_BONUS)
+		end
+	end)
+end

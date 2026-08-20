@@ -1,0 +1,5 @@
+# Modelos vendorizados (asset binário versionado) — nunca converter EOL/merge
+*.rbxm binary
+*.rbxmx binary
+*.rbxl binary
+*.rbxlx binary
